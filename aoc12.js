@@ -1,19 +1,19 @@
-const exp = require('constants');
-
 let input = require('fs').readFileSync('./input12.txt').toString().trim().split("\n");
 
 if (1) {
     input = `
-???.### 1,1,3
 .??..??...?##. 1,1,3
+?###???????? 3,2,1
+???.### 1,1,3
 ?#?#?#?#?#?#?#? 1,3,1,6
 ????.#...#... 4,1,1
 ????.######..#####. 1,6,5
-?###???????? 3,2,1
 `.trim().split("\n")
 }
+const cache = {};
 
-
+let checkCount = 0;
+let cacheCount = 0;
 const choices = input.map((line) => {
     const [map, second] = line.trim().split(' ');
     const rows = second.trim().split(',').filter(Boolean).map(x => parseInt(x, 10));
@@ -22,54 +22,86 @@ const choices = input.map((line) => {
     for (let i = 0; i < 5; i++) {
         expandedMap = expandedMap + map + (i < 4 ? '?' : '');
     }
-    console.log('expanded ' + expandedMap)
+    //console.log('expanded ' + expandedMap)
 
     let expandedRows = [];
     for (let i = 0; i < 5; i++) {
         expandedRows.push(...rows);
     }
-    console.log('expanded2 ' + expandedRows)
+    //console.log('expanded2 ' + expandedRows)
 
     //const chk = check(map, rows)
     const chk = check(expandedMap, expandedRows)
-    console.log('check: ' + map + ' = ' + chk);
+    console.log('result: ' + map + ' = ' + chk);
+
+    console.log('count: ', checkCount)
+    console.log('cached: ', cacheCount)
+    //console.log('cache: ', cache)
 
     process.exit();
     return chk;
 });
 
-console.log('choices', choices.reduce((ret, i) => ret + i, 0));
+console.log('choices', choices);
+console.log('sum', choices.reduce((ret, i) => ret + i, 0));
 
 
-function check(string, required) {
 
-    // enqueue more permutations 
-    if (string.indexOf('?') > -1) {
-        for (let i = 0; i < string.length; i++) {
-            if (string[i] === '?') {
-                const broken = replaceWith(string, i, "#");
-                if (count(broken, '.') < required.length) {
-                    return 0;
-                }
-
-                const fixed = replaceWith(string, i, ".");
-
-                return check(broken, required)
-                    + check(fixed, required)
-            }
+function check(string, required, depth =0) {
+    if (cache[string + required] !== undefined) {
+        cacheCount++;
+        return cache[string+required];
+    }
+    checkCount++;
+    
+    if (!string.length) {
+        if (!required.length) {
+            return cache[string+required] = 1;
         }
-    } else {
-        // early check for shape alone
-        const spl = string.replace(/^\.+/, '').replace(/\.+$/, '').replace(/\.+/g, '.').split('.');
-        console.log('check: ' + string);
-        if (spl.length !== required.length) {
-            return 0;
-        }
-        const match = spl.map(spl => spl.length).every((a, i) => a === required[i]);
-        console.log('check: ' + string + ' ' + (match ? 'Yes' : ''))
-        return match ? 1 : 0;
+        return cache[string+required] = 0;
+    }
+    if (!required.length) {
+        return cache[string+required] = string.indexOf('#') === -1;
     }
 
+    if (string[0] === '?') {
+        const broken = replaceWith(string, 0, "#");
+        const fixed = replaceWith(string, 0, ".");
+
+        let one = check(broken, required, depth + 1);
+        let two = check(fixed, required, depth + 1);
+
+        return cache[string+required] = one + two;
+    } else if (string[0] === '#') {
+        let good = true;
+        for(let i=0; i<required[0]; i++) {
+            if (string[i] === '.') {
+                good = false;
+                break;
+            }
+        }
+
+        // next char needs to be ? or .
+        if (string[required[0]] === '#') {
+            good = false;
+        }
+
+        if (good) {
+            return cache[string + required] = check(
+                string.substring(required[0]+1), 
+                required.slice(1), 
+                depth + 1, 
+            )
+        }
+        return cache[string+required] = 0;
+    } else if (string[0] === '.') {
+        let pos = string.split("").findIndex(d => d!=='.');
+        return cache[string+required] = check(
+            string.substring(pos), 
+            required, 
+            depth + 1,
+        );
+    }
 }
 
 function replaceWith(string, i, char) {
