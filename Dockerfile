@@ -6,4 +6,5 @@ COPY src/package.json src/package-lock.json .
 RUN npm install
 COPY src/ .
 EXPOSE 3001
+
 CMD [ "node", "index.js"]
