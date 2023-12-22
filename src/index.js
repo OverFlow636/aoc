@@ -32,12 +32,3 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Example app listening on port 2 ${port}`)
 })
-
-
-function handle() {
-    console.log('got SIGTERM event');
-    process.exit()
-}
-
-
-process.on('SIGTERM', handle);
