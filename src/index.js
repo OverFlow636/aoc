@@ -2,13 +2,11 @@ const express = require('express')
 const app = express()
 const port = 3001;
 
+app.get('/healthcheck', (req, res) => {
+    res.send('OK');
+});
+
 app.get('/', (req, res) => {
-
-    if (req.path.includes('healthcheck')) {
-        res.send('OK');
-        return;
-    }
-
     const host = req.headers && req.headers.host || null;
     console.log('in host: ' + host);
     switch (host) {
