@@ -39,4 +39,4 @@ function handle() {
     process.exit()
 }
 
-process.on('SIGTERM', handle);
+process.on(15, handle);
