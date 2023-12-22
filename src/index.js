@@ -32,3 +32,5 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
+
+process.on('SIGTERM', () => process.exit());
