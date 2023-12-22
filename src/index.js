@@ -35,9 +35,8 @@ app.listen(port, () => {
 
 
 function handle() {
-    console.log('got some event');
+    console.log('got SIGTERM event');
     process.exit()
 }
 
-
-process.on(15, handle);
+process.on('SIGTERM', handle);
