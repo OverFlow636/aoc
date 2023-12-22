@@ -40,5 +40,3 @@ function handle() {
 }
 
 process.on('SIGTERM', handle);
-process.on('SIGINT', handle);
-process.on('SIGKILL', handle);
