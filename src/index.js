@@ -33,4 +33,12 @@ app.listen(port, () => {
     console.log(`Example app listening on port 2 ${port}`)
 })
 
-process.on('SIGTERM', () => process.exit());
+
+function handle() {
+    console.log('got some event');
+    process.exit()
+}
+
+process.on('SIGTERM', handle);
+process.on('SIGINT', handle);
+process.on('SIGKILL', handle);
